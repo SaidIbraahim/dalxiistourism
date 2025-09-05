@@ -1,12 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-<<<<<<< HEAD
+      {"source": "/(.*)", "destination": "/"}
   ]
-=======
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite"
->>>>>>> master
-} 
+  }
