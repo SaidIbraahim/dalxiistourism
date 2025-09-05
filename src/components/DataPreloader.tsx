@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { DataService } from '../services/DataService';
+import { DataService } from '../services/dataService';
 
 const DataPreloader = () => {
   useEffect(() => {

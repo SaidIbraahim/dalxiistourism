@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle, Calendar, Users, Mail, User, Phone, Globe } fro
 import { BookingsService } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import { usePackages, usePackagesLoading, usePackagesError, useServices, useServicesLoading, useServicesError, useClearServicesCache } from '../stores/appStore';
-import { DataService } from '../services/DataService';
+import { DataService } from '../services/dataService';
 import { fallbackPackages, fallbackServices } from '../data/fallbackData';
 
 interface BookingFormData {

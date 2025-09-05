@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { MapPin, Camera } from 'lucide-react';
 import { useDestinations, useDestinationsLoading, useDestinationsError } from '../stores/appStore';
-import { DataService } from '../services/DataService';
+import { DataService } from '../services/dataService';
 import { brandClasses } from '../styles/designSystem';
 
 const DestinationsPage = () => {
