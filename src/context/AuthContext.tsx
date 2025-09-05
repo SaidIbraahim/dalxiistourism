@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // 🚧 DEVELOPMENT MODE: Set to false for production deployment
 // ⚠️ SECURITY: Never set to true in production!
-const DEV_MODE = true; // ⚠️ SECURITY: Set to false in production
+const DEV_MODE = false; // ✅ PRODUCTION: Development mode disabled
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null);
