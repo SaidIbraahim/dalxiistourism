@@ -41,9 +41,9 @@ export class DataService {
     try {
       console.log('📦 DataService: Fetching packages from API...');
       
-      // Add timeout to prevent hanging (increased to 30 seconds)
+      // Shorter timeout to prevent blocking UI
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 8000)
       );
       
       const response = await Promise.race([
@@ -60,40 +60,25 @@ export class DataService {
         console.log('📦 DataService: Packages loaded successfully:', response.data.length);
         return response;
       } else {
-        console.error('📦 DataService: Failed to fetch packages:', response.error);
-        this.store.setError('packages', response.error?.message || 'Failed to fetch packages');
-        return response;
+        console.warn('📦 DataService: API failed, using fallback data');
+        this.store.setPackages(fallbackPackages as any);
+        return {
+          success: true,
+          data: fallbackPackages as any,
+          timestamp: new Date().toISOString(),
+          fallback: true
+        };
       }
     } catch (error: any) {
-      console.error('📦 DataService: Packages fetch error:', error);
+      console.warn('📦 DataService: Packages fetch error, using fallback:', error.message);
       
-      // If it's a timeout or network error, try to use cached data or fallback
-      if (error.message === 'Request timeout' || error.message.includes('fetch')) {
-        console.log('📦 DataService: Using cached packages data as fallback');
-        const cachedPackages = this.store.packages;
-        if (cachedPackages && cachedPackages.length > 0) {
-          console.log('📦 DataService: Using cached packages:', cachedPackages.length);
-          return {
-            success: true,
-            data: cachedPackages,
-            timestamp: new Date().toISOString()
-          };
-        } else {
-          console.log('📦 DataService: Using fallback packages data');
-          this.store.setPackages(fallbackPackages as any);
-          return {
-            success: true,
-            data: fallbackPackages as any,
-            timestamp: new Date().toISOString()
-          };
-        }
-      }
-      
-      this.store.setError('packages', error.message || 'Failed to fetch packages');
+      // Always provide fallback data instead of failing
+      this.store.setPackages(fallbackPackages as any);
       return {
-        success: false,
-        error: { code: 'INTERNAL_ERROR', message: error.message },
-        timestamp: new Date().toISOString()
+        success: true,
+        data: fallbackPackages as any,
+        timestamp: new Date().toISOString(),
+        fallback: true
       };
     } finally {
       this.store.setLoading('packages', false);
@@ -309,9 +294,9 @@ export class DataService {
     try {
       console.log('🏝️ DataService: Fetching destinations from API...');
       
-      // Add timeout to prevent hanging (increased to 30 seconds)
+      // Shorter timeout to prevent blocking UI
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 8000)
       );
       
       const response = await Promise.race([
@@ -328,40 +313,25 @@ export class DataService {
         console.log('🏝️ DataService: Destinations loaded successfully:', response.data.length);
         return response;
       } else {
-        console.error('🏝️ DataService: Failed to fetch destinations:', response.error);
-        this.store.setError('destinations', response.error?.message || 'Failed to fetch destinations');
-        return response;
+        console.warn('🏝️ DataService: API failed, using fallback data');
+        this.store.setDestinations(fallbackDestinations as any);
+        return {
+          success: true,
+          data: fallbackDestinations as any,
+          timestamp: new Date().toISOString(),
+          fallback: true
+        };
       }
     } catch (error: any) {
-      console.error('🏝️ DataService: Destinations fetch error:', error);
+      console.warn('🏝️ DataService: Destinations fetch error, using fallback:', error.message);
       
-      // If it's a timeout or network error, try to use cached data or fallback
-      if (error.message === 'Request timeout' || error.message.includes('fetch')) {
-        console.log('🏝️ DataService: Using cached destinations data as fallback');
-        const cachedDestinations = this.store.destinations;
-        if (cachedDestinations && cachedDestinations.length > 0) {
-          console.log('🏝️ DataService: Using cached destinations:', cachedDestinations.length);
-          return {
-            success: true,
-            data: cachedDestinations,
-            timestamp: new Date().toISOString()
-          };
-        } else {
-          console.log('🏝️ DataService: Using fallback destinations data');
-          this.store.setDestinations(fallbackDestinations as any);
-          return {
-            success: true,
-            data: fallbackDestinations as any,
-            timestamp: new Date().toISOString()
-          };
-        }
-      }
-      
-      this.store.setError('destinations', error.message || 'Failed to fetch destinations');
+      // Always provide fallback data instead of failing
+      this.store.setDestinations(fallbackDestinations as any);
       return {
-        success: false,
-        error: { code: 'INTERNAL_ERROR', message: error.message },
-        timestamp: new Date().toISOString()
+        success: true,
+        data: fallbackDestinations as any,
+        timestamp: new Date().toISOString(),
+        fallback: true
       };
     } finally {
       this.store.setLoading('destinations', false);
@@ -452,21 +422,39 @@ export class DataService {
     this.store.setError('services', null);
 
     try {
-      const response = await ServicesService.getServices();
+      // Add timeout to prevent blocking
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 8000)
+      );
+      
+      const response = await Promise.race([
+        ServicesService.getServices(),
+        timeoutPromise
+      ]) as any;
       
       if (response.success && response.data) {
         this.store.setServices(response.data);
         return response;
       } else {
-        this.store.setError('services', response.error?.message || 'Failed to fetch services');
-        return response;
+        console.warn('🔧 DataService: API failed, using fallback data');
+        this.store.setServices(fallbackServices as any);
+        return {
+          success: true,
+          data: fallbackServices as any,
+          timestamp: new Date().toISOString(),
+          fallback: true
+        };
       }
     } catch (error: any) {
-      this.store.setError('services', error.message || 'Failed to fetch services');
+      console.warn('🔧 DataService: Services fetch error, using fallback:', error.message);
+      
+      // Always provide fallback data instead of failing
+      this.store.setServices(fallbackServices as any);
       return {
-        success: false,
-        error: { code: 'INTERNAL_ERROR', message: error.message },
-        timestamp: new Date().toISOString()
+        success: true,
+        data: fallbackServices as any,
+        timestamp: new Date().toISOString(),
+        fallback: true
       };
     } finally {
       this.store.setLoading('services', false);

@@ -316,18 +316,25 @@ export class BookingsService {
 
   static async createBooking(bookingData: Inserts<'bookings'>): Promise<ApiResponse<Tables<'bookings'>>> {
     try {
+      console.log('📝 BookingsService: Creating booking with data:', bookingData);
+      
       const { data, error } = await supabase
         .from('bookings')
         .insert(bookingData)
         .select()
         .single();
 
+      console.log('📝 BookingsService: Supabase response:', { data, error });
+
       if (error) {
+        console.error('📝 BookingsService: Supabase error:', error);
         return createApiResponse(false, undefined, handleSupabaseError(error));
       }
 
+      console.log('📝 BookingsService: Booking created successfully:', data);
       return createApiResponse(true, data);
     } catch (error: any) {
+      console.error('📝 BookingsService: Exception:', error);
       return createApiResponse(false, undefined, {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'Failed to create booking',

@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		const initialize = async () => {
 			try {
 				console.log('🔐 AuthContext: Initializing authentication...');
-				console.log('🔐 DEV_MODE:', DEV_MODE);
 				
 				if (DEV_MODE) {
 					// Development mode: Auto-authenticate as admin
@@ -36,67 +35,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 						id: 'dev-admin-id',
 						email: 'dev@dalxiis.com',
 						user_metadata: { full_name: 'Development Admin' }
-					} as any; // Use 'any' for development mock user
+					} as any;
 					
 					setUser(mockUser);
 					setIsAuthenticated(true);
 					setIsAdmin(true);
-				} else {
-					// Production mode: Normal authentication
-					console.log('🔐 Production mode: Checking for existing session...');
-					
-					          // Add timeout to prevent hanging (increased to 15 seconds)
-          const sessionPromise = supabase.auth.getSession();
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Session check timeout')), 15000)
-          );
-					
+					setIsLoading(false);
+					return;
+				}
+
+				// Production mode: Non-blocking authentication check
+				console.log('🔐 Production mode: Checking for existing session...');
+				
+				// Use a shorter timeout and don't block the app
+				const sessionPromise = supabase.auth.getSession();
+				const timeoutPromise = new Promise((_, reject) => 
+					setTimeout(() => reject(new Error('Session check timeout')), 5000)
+				);
+				
+				try {
 					const { data: { session }, error } = await Promise.race([
 						sessionPromise,
 						timeoutPromise
 					]) as any;
 					
 					if (error) {
-						console.error('❌ Session check error:', error);
-						// Don't set loading to false here, let it continue to finally block
+						console.warn('⚠️ Session check error (non-blocking):', error);
+					} else if (session?.user) {
+						console.log('✅ User found in session:', session.user.email);
+						setUser(session.user);
+						setIsAuthenticated(true);
+						// Check role asynchronously without blocking
+						checkRole(session.user.id).catch(err => 
+							console.warn('⚠️ Role check failed:', err)
+						);
 					} else {
-						console.log('🔐 Session check result:', session ? 'Session found' : 'No session');
-						
-						if (session?.user) {
-							console.log('✅ User found in session:', session.user.email);
-							setUser(session.user);
-							setIsAuthenticated(true);
-							await checkRole(session.user.id);
-						} else {
-							console.log('ℹ️ No user session found');
-						}
+						console.log('ℹ️ No user session found');
 					}
+				} catch (timeoutError) {
+					console.warn('⚠️ Session check timeout (non-blocking):', timeoutError);
 				}
+				
 			} catch (error) {
-				console.error('❌ Auth initialization error:', error);
+				console.warn('⚠️ Auth initialization error (non-blocking):', error);
 			} finally {
 				console.log('🔐 AuthContext: Setting isLoading to false');
 				setIsLoading(false);
 			}
 		};
+		
+		// Initialize immediately without blocking
 		initialize();
 
-		// Only set up auth listeners in production mode
-		if (!DEV_MODE) {
-			const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-				if (event === 'SIGNED_IN' && session?.user) {
-					setUser(session.user);
-					setIsAuthenticated(true);
-					await checkRole(session.user.id);
-				}
-				if (event === 'SIGNED_OUT') {
-					setUser(null);
-					setIsAuthenticated(false);
-					setIsAdmin(false);
-				}
-			});
-			return () => subscription.unsubscribe();
-		}
+		// Set up auth listeners for real-time updates
+		const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+			console.log('🔐 Auth state change:', event);
+			
+			if (event === 'SIGNED_IN' && session?.user) {
+				setUser(session.user);
+				setIsAuthenticated(true);
+				await checkRole(session.user.id);
+			} else if (event === 'SIGNED_OUT') {
+				setUser(null);
+				setIsAuthenticated(false);
+				setIsAdmin(false);
+			}
+		});
+		
+		return () => subscription.unsubscribe();
 	}, []);
 
 	const checkRole = async (userId: string): Promise<boolean> => {
