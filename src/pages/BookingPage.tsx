@@ -160,12 +160,29 @@ const BookingPage = () => {
 
   const handleStepChange = (newStep: number) => {
     setStep(newStep);
-    // Scroll to top of form container smoothly when step changes
+    
+    // Enhanced scroll behavior for better UX
     if (formContainerRef.current) {
-      formContainerRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+      // For step 2 (Details), scroll to the very top of the form
+      if (newStep === 2) {
+        formContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        // Additional scroll to ensure we're at the very top
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }, 100);
+      } else {
+        // For other steps, scroll to form container
+        formContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     }
   };
 
@@ -274,7 +291,7 @@ const BookingPage = () => {
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Booking submission timeout')), 10000)
+        setTimeout(() => reject(new Error('Booking submission timeout')), 30000)
       );
 
       // Try booking submission with retry
@@ -321,7 +338,7 @@ const BookingPage = () => {
       
       // Show user-friendly error message
       let errorMessage = 'Failed to submit booking';
-      if (error.message === 'Booking submission timeout') {
+      if (error.message === 'Booking submission timeout' || error.message === 'Booking creation timeout') {
         errorMessage = 'Booking submission timed out. Please try again or contact us directly.';
       } else if (error.message.includes('fetch')) {
         errorMessage = 'Network error. Please check your connection and try again.';
@@ -334,7 +351,7 @@ const BookingPage = () => {
       
       // Show alternative contact information
       setTimeout(() => {
-        showToast('info', 'Alternative', 'You can also contact us directly at +252907797695 or support@dalxiis.com');
+        showToast('info', 'Alternative', 'You can also contact us directly at +252907793854 or dalxiistta@gmail.com');
       }, 3000);
     } finally {
       setIsSubmitting(false);
@@ -439,7 +456,7 @@ const BookingPage = () => {
                 </button>
 
                 <a
-                  href="https://wa.me/252907797695"
+                  href="https://wa.me/252907793854"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-green-500 text-white py-3 px-4 rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors flex items-center justify-center"
@@ -455,11 +472,11 @@ const BookingPage = () => {
                 <div className="text-sm text-gray-500 space-y-1">
                   <div className="flex items-center">
                     <span className="mr-2">📧</span>
-                    support@dalxiis.com
+                    dalxiistta@gmail.com
                 </div>
                   <div className="flex items-center">
                     <span className="mr-2">📞</span>
-                    +252 905 345 879
+                    +252 907793854
               </div>
             </div>
           </div>
@@ -589,215 +606,219 @@ const BookingPage = () => {
         {/* Main Content */}
         <div ref={formContainerRef} className="bg-white rounded-xl shadow-xl border border-gray-100">
           {step === 4 ? (
-            /* Review Page - Modern Compact Design */
+            /* Review Page - Compact Responsive Design */
             <div className="p-4">
-              <div className="max-w-5xl mx-auto">
-                {/* Header */}
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg mb-4">
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                      Almost there! One final step
-                    </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Review & Confirmation</h2>
-                  <p className="text-gray-600">Please review all details before submitting your booking</p>
+              <div className="max-w-6xl mx-auto">
+                {/* Compact Header */}
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg mb-3">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Almost there! One final step
                   </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Review & Confirmation</h2>
+                  <p className="text-gray-600 text-sm md:text-base">Please review all details before submitting your booking</p>
+                </div>
 
-                {/* Single Card - Minimal Design */}
+                {/* Single Card Layout */}
                 <div className="max-w-4xl mx-auto">
-                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+                    {/* Header */}
                     <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                       <h3 className="text-xl font-semibold text-white flex items-center">
                         <CheckCircle className="w-6 h-6 mr-3" />
                         Booking Summary
-                    </h3>
+                      </h3>
                     </div>
                     
+                    {/* Content */}
                     <div className="p-6">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Left Side - Details */}
+                        {/* Left Column */}
                         <div className="space-y-6">
-                          {/* Services */}
+                          {/* Selected Services */}
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Selected Services</h4>
-                            <div className="space-y-2">
-                      {Object.entries(selectedServices)
-                        .filter(([_, selected]) => selected)
-                        .map(([serviceId]) => {
-                          const service = unifiedServices.find(s => s.id === serviceId);
-                          if (!service) return null;
-                          return (
-                                    <div key={serviceId} className="flex justify-between items-center py-2 border-b border-gray-100">
-                              <div>
-                                        <div className="font-medium text-gray-900">{service.name}</div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Selected Services</h4>
+                            <div className="space-y-3">
+                              {Object.entries(selectedServices)
+                                .filter(([_, selected]) => selected)
+                                .map(([serviceId]) => {
+                                  const service = unifiedServices.find(s => s.id === serviceId);
+                                  if (!service) return null;
+                                  return (
+                                    <div key={serviceId} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                      <div className="flex-1">
+                                        <div className="font-medium text-gray-900 text-sm">{service.name}</div>
                                         <div className="text-xs text-gray-500">{service.duration} • {service.location}</div>
-                              </div>
-                                      <div className="text-orange-600 font-semibold">
+                                      </div>
+                                      <div className="text-orange-600 font-semibold text-sm ml-3">
                                         {service.duration_days 
                                           ? `$${(service.basePrice * formData.adults + (formData.children * service.basePrice * 0.7)).toFixed(0)}`
                                           : `$${service.basePrice}`
                                         }
                                       </div>
+                                    </div>
+                                  );
+                                })}
                             </div>
-                          );
-                        })}
-                    </div>
-                  </div>
+                          </div>
 
-                          {/* Client Info */}
+                          {/* Client Details */}
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Client Details</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center py-1">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Client Details</h4>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <span className="text-sm text-gray-600">Name</span>
                                 <span className="text-sm font-medium text-gray-900">{formData.firstName} {formData.lastName}</span>
-                      </div>
-                              <div className="flex justify-between items-center py-1">
+                              </div>
+                              <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <span className="text-sm text-gray-600">Email</span>
                                 <span className="text-sm font-medium text-gray-900">{formData.email}</span>
-                      </div>
-                      {formData.phone && (
-                                <div className="flex justify-between items-center py-1">
+                              </div>
+                              {formData.phone && (
+                                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                   <span className="text-sm text-gray-600">Phone</span>
                                   <span className="text-sm font-medium text-gray-900">{formData.phone}</span>
-                        </div>
-                      )}
-                      {formData.nationality && (
-                                <div className="flex justify-between items-center py-1">
+                                </div>
+                              )}
+                              {formData.nationality && (
+                                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                   <span className="text-sm text-gray-600">Nationality</span>
                                   <span className="text-sm font-medium text-gray-900">{formData.nationality}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
 
-                          {/* Trip Info */}
+                        {/* Right Column */}
+                        <div className="space-y-6">
+                          {/* Trip Details */}
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Trip Details</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center py-1">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Trip Details</h4>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <span className="text-sm text-gray-600">Start Date</span>
                                 <span className="text-sm font-medium text-gray-900">
-                          {formData.startDate ? new Date(formData.startDate).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric'
-                          }) : 'Not set'}
+                                  {formData.startDate ? new Date(formData.startDate).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  }) : 'Not set'}
                                 </span>
-                      </div>
-                      {formData.endDate && (
-                                <div className="flex justify-between items-center py-1">
+                              </div>
+                              {formData.endDate && (
+                                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                   <span className="text-sm text-gray-600">End Date</span>
                                   <span className="text-sm font-medium text-gray-900">
-                            {new Date(formData.endDate).toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                                    {new Date(formData.endDate).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })}
                                   </span>
-                        </div>
-                      )}
-                              <div className="flex justify-between items-center py-1">
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <span className="text-sm text-gray-600">Travelers</span>
                                 <span className="text-sm font-medium text-gray-900">
-                          {formData.adults} adult{formData.adults !== 1 ? 's' : ''}
-                          {formData.children > 0 && `, ${formData.children} child${formData.children !== 1 ? 'ren' : ''}`}
+                                  {formData.adults} adult{formData.adults !== 1 ? 's' : ''}
+                                  {formData.children > 0 && `, ${formData.children} child${formData.children !== 1 ? 'ren' : ''}`}
                                 </span>
-                      </div>
-                      {formData.startDate && formData.endDate && (
-                                <div className="flex justify-between items-center py-1">
+                              </div>
+                              {formData.startDate && formData.endDate && (
+                                <div className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
                                   <span className="text-sm text-gray-600">Duration</span>
                                   <span className="text-sm font-medium text-gray-900">
-                            {Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
+                                    {Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
                                   </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
 
-                          {/* Additional Info */}
-                  {(formData.dietaryRequirements || formData.specialRequests) && (
+                          {/* Additional Information */}
+                          {(formData.dietaryRequirements || formData.specialRequests) && (
                             <div>
-                              <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">Additional Information</h4>
-                              <div className="space-y-2">
-                        {formData.dietaryRequirements && (
-                                  <div className="flex justify-between items-start py-1">
-                                    <span className="text-sm text-gray-600">Dietary Requirements</span>
-                                    <span className="text-sm text-gray-900 text-right max-w-xs">{formData.dietaryRequirements}</span>
-                          </div>
-                        )}
-                        {formData.specialRequests && (
-                                  <div className="flex justify-between items-start py-1">
-                                    <span className="text-sm text-gray-600">Special Requests</span>
-                                    <span className="text-sm text-gray-900 text-right max-w-xs">{formData.specialRequests}</span>
+                              <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Additional Information</h4>
+                              <div className="space-y-3">
+                                {formData.dietaryRequirements && (
+                                  <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="text-sm text-gray-600 mb-1">Dietary Requirements</div>
+                                    <div className="text-sm text-gray-900">{formData.dietaryRequirements}</div>
+                                  </div>
+                                )}
+                                {formData.specialRequests && (
+                                  <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="text-sm text-gray-600 mb-1">Special Requests</div>
+                                    <div className="text-sm text-gray-900">{formData.specialRequests}</div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Total Summary */}
+                      <div className="mt-8 pt-6 border-t border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-xl font-semibold text-gray-900">Total Amount</span>
+                          <span className="text-3xl font-bold text-orange-600">${calculateTotal().toFixed(0)}</span>
+                        </div>
+                        {formData.children > 0 && (
+                          <div className="text-sm text-orange-700 bg-orange-100 rounded-lg p-3 font-medium">
+                            ✨ Children receive 30% discount on packages
                           </div>
                         )}
                       </div>
-                    </div>
-                  )}
+
+                      {/* Confirmation Notice */}
+                      <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="bg-green-500 p-2 rounded-lg">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-green-900 text-sm mb-2">Ready to Submit!</p>
+                            <p className="text-sm text-green-700 leading-relaxed">
+                              We'll contact you within 2 hours to confirm your booking and arrange payment.
+                            </p>
+                            <div className="mt-2 text-sm text-green-600 font-medium">
+                              <strong>Next:</strong> Confirmation call → Payment → Trip prep
                             </div>
-
-                        {/* Right Side - Total & Actions */}
-                        <div className="space-y-6">
-                          {/* Total Summary */}
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex justify-between items-center">
-                              <span className="text-lg font-semibold text-gray-900">Total Amount</span>
-                              <span className="text-2xl font-bold text-orange-600">${calculateTotal().toFixed(0)}</span>
-                            </div>
-                      {formData.children > 0 && (
-                              <div className="text-xs text-orange-600 bg-orange-50 rounded p-2 mt-3">
-                          ✨ Children receive 30% discount on packages
-                        </div>
-                      )}
-                  </div>
-
-                  {/* Confirmation Notice */}
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="font-medium text-green-900 text-sm mb-1">Ready to Submit!</p>
-                                <p className="text-xs text-green-700 leading-relaxed">
-                                  We'll contact you within 2 hours to confirm your booking and arrange payment.
-                                </p>
-                                <div className="mt-2 text-xs text-green-600">
-                                  <strong>Next:</strong> Confirmation call → Payment → Trip prep
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                          {/* Action Buttons */}
-                          <div className="space-y-3">
-                    <button
-                      onClick={() => handleStepChange(step - 1)}
-                              className="w-full py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
-                    >
-                              <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back to Edit
-                    </button>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={!canProceed(step) || isSubmitting}
-                              className={`w-full py-4 px-4 rounded-lg text-sm font-bold transition-all duration-200 ${canProceed(step) && !isSubmitting
-                                ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg transform hover:scale-105'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                                  Processing...
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 mr-2" />
-                          Confirm & Submit Booking
-                        </div>
-                      )}
-                    </button>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                        <button
+                          onClick={() => handleStepChange(step - 1)}
+                          className="flex-1 sm:flex-none flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <ArrowLeft className="w-4 h-4 mr-2" />
+                          Back to Edit
+                        </button>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={!canProceed(step) || isSubmitting}
+                          className={`flex-1 px-8 py-4 rounded-lg text-sm font-bold transition-all duration-200 ${canProceed(step) && !isSubmitting
+                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg transform hover:scale-105'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                          {isSubmitting ? (
+                            <div className="flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                              Processing...
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center">
+                              <CheckCircle className="w-5 h-5 mr-2" />
+                              Confirm & Submit Booking
+                            </div>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -810,74 +831,74 @@ const BookingPage = () => {
               {/* Form Content - Full Width for steps 1-3 */}
               <div className="p-4 md:p-6">
 
-                {/* Step 1: Service Selection */}
+                {/* Step 1: Service Selection - Compact Design */}
                 {step === 1 && (
-                  <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4 md:p-6">
-                    {/* Mobile-First Header */}
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-lg p-4 md:p-6">
+                    {/* Compact Header */}
                     <div className="mb-6">
-                      <div className="text-center md:text-left mb-4">
-                        <h2 className="text-xl md:text-2xl font-bold text-teal-900 mb-2">Select Your Services</h2>
-                        <p className="text-sm md:text-base text-teal-700">Choose from our premium travel packages and services</p>
-                      </div>
-                      {selectedCount > 0 && (
-                        <div className="bg-orange-500 text-white px-4 py-3 rounded-xl font-semibold shadow-lg text-center">
-                          <div className="text-lg font-bold">{selectedCount} Selected</div>
-                          <div className="text-sm opacity-90">Total: ${calculateTotal().toFixed(0)}</div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-3 shadow-sm">
+                          <h2 className="text-lg md:text-xl font-bold text-gray-900">Select Services</h2>
+                          <p className="text-sm text-gray-600">Choose your travel packages and services</p>
                         </div>
-                      )}
+                        {selectedCount > 0 && (
+                          <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-lg">
+                            {selectedCount} Selected - ${calculateTotal().toFixed(0)}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 md:gap-4">
+                    {/* Compact Service Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {unifiedServices.map(service => (
                         <label
                           key={service.id}
-                          className={`group relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 ${selectedServices[service.id]
-                            ? 'ring-2 ring-teal-400 shadow-lg'
+                          className={`group relative cursor-pointer transition-all duration-200 ${selectedServices[service.id]
+                            ? 'ring-2 ring-emerald-400 shadow-lg'
                             : 'hover:shadow-md'
                             }`}
                         >
-                          <div className={`p-4 md:p-5 border-2 rounded-xl transition-all ${selectedServices[service.id]
-                            ? 'border-teal-400 bg-gradient-to-br from-teal-100 to-cyan-100'
-                            : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-gradient-to-br hover:from-teal-50 hover:to-cyan-50'
+                          <div className={`p-4 border-2 rounded-xl transition-all ${selectedServices[service.id]
+                            ? 'border-emerald-400 bg-gradient-to-br from-emerald-100 to-teal-100'
+                            : 'border-gray-200 bg-white hover:border-emerald-300 hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50'
                             }`}>
 
-                            {/* Mobile-Optimized Layout */}
-                            <div className="flex items-start space-x-3">
-                              {/* Checkbox */}
-                              <div className="flex-shrink-0 mt-1">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedServices[service.id] || false}
-                                  onChange={() => handleServiceToggle(service.id)}
-                                  className="w-5 h-5 text-teal-600 focus:ring-teal-500 rounded"
-                                />
-                              </div>
-
-                              {/* Content */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between mb-2">
-                                  <h3 className={`text-base md:text-lg font-bold ${selectedServices[service.id] ? 'text-teal-900' : 'text-gray-900'} leading-tight pr-2`}>
+                            {/* Compact Layout */}
+                            <div className="space-y-3">
+                              {/* Header with checkbox and price */}
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedServices[service.id] || false}
+                                    onChange={() => handleServiceToggle(service.id)}
+                                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
+                                  />
+                                  <h3 className={`text-sm font-bold ${selectedServices[service.id] ? 'text-emerald-900' : 'text-gray-900'} leading-tight`}>
                                     {service.name}
                                   </h3>
-                                  <div className={`text-lg md:text-xl font-bold ${selectedServices[service.id] ? 'text-orange-600' : 'text-teal-600'} flex-shrink-0`}>
-                                    ${service.basePrice}
-                                  </div>
                                 </div>
-
-                                <p className={`text-xs md:text-sm mb-3 ${selectedServices[service.id] ? 'text-teal-800' : 'text-gray-600'} line-clamp-2`}>
-                                  {service.description}
-                                </p>
-
-                                <div className={`flex flex-wrap items-center gap-2 text-xs ${selectedServices[service.id] ? 'text-teal-700' : 'text-gray-500'}`}>
-                                  <span className="bg-white/70 px-2 py-1 rounded-full">{service.duration}</span>
-                                  <span className="bg-white/70 px-2 py-1 rounded-full">{service.location}</span>
+                                <div className={`text-lg font-bold ${selectedServices[service.id] ? 'text-orange-600' : 'text-emerald-600'}`}>
+                                  ${service.basePrice}
                                 </div>
+                              </div>
+
+                              {/* Description */}
+                              <p className={`text-xs ${selectedServices[service.id] ? 'text-emerald-800' : 'text-gray-600'} line-clamp-2`}>
+                                {service.description}
+                              </p>
+
+                              {/* Tags */}
+                              <div className={`flex items-center gap-2 text-xs ${selectedServices[service.id] ? 'text-emerald-700' : 'text-gray-500'}`}>
+                                <span className="bg-white/70 px-2 py-1 rounded-full">{service.duration}</span>
+                                <span className="bg-white/70 px-2 py-1 rounded-full">{service.location}</span>
                               </div>
 
                               {/* Selection Indicator */}
                               {selectedServices[service.id] && (
-                                <div className="flex-shrink-0">
-                                  <CheckCircle className="w-6 h-6 text-orange-500" />
+                                <div className="flex justify-center">
+                                  <CheckCircle className="w-5 h-5 text-orange-500" />
                                 </div>
                               )}
                             </div>
@@ -888,383 +909,332 @@ const BookingPage = () => {
                   </div>
                 )}
 
-                {/* Step 2: Personal Details */}
+                {/* Step 2: Personal Details - Compact Design */}
                 {step === 2 && (
-                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 md:p-6">
-                    {/* Mobile-First Header */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-lg p-4 md:p-6">
+                    {/* Compact Header */}
                     <div className="mb-6">
-                      <div className="text-center md:text-left mb-4">
-                        <h2 className="text-xl md:text-2xl font-bold text-orange-900 mb-2">Your Details</h2>
-                        <p className="text-sm md:text-base text-orange-700">Tell us about yourself and your travel plans</p>
-                      </div>
-                      {selectedCount > 0 && (
-                        <div className="bg-teal-500 text-white px-4 py-3 rounded-xl font-semibold shadow-lg text-center">
-                          <div className="text-sm">{selectedCount} Services Selected</div>
-                          <div className="text-lg font-bold">${calculateTotal().toFixed(0)}</div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-3 shadow-sm">
+                          <h2 className="text-lg md:text-xl font-bold text-gray-900">Your Details</h2>
+                          <p className="text-sm text-gray-600">Tell us about yourself and your travel plans</p>
                         </div>
-                      )}
+                        {selectedCount > 0 && (
+                          <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-lg">
+                            {selectedCount} Services - ${calculateTotal().toFixed(0)}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    {/* Compact Grid Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* First Name */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-4 md:p-5 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-orange-400">
-                          <label className="flex items-center text-sm font-bold text-orange-800 mb-3">
-                            <div className="bg-orange-500 p-2 rounded-lg mr-3">
-                              <User className="w-4 h-4 text-white" />
-                            </div>
-                            First Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.firstName}
-                            onChange={(e) => handleInputChange('firstName', e.target.value)}
-                            className="w-full px-4 py-3 md:py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 placeholder-orange-400 text-base"
-                            placeholder="Enter your first name"
-                          />
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-orange-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <User className="w-4 h-4 mr-2 text-orange-500" />
+                          First Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors shadow-sm"
+                          placeholder="Enter your first name"
+                        />
                       </div>
 
                       {/* Last Name */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-4 md:p-5 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-orange-400">
-                          <label className="flex items-center text-sm font-bold text-orange-800 mb-3">
-                            <div className="bg-orange-500 p-2 rounded-lg mr-3">
-                              <User className="w-4 h-4 text-white" />
-                            </div>
-                            Last Name *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.lastName}
-                            onChange={(e) => handleInputChange('lastName', e.target.value)}
-                            className="w-full px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 placeholder-orange-400 text-base"
-                            placeholder="Enter your last name"
-                          />
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-orange-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <User className="w-4 h-4 mr-2 text-orange-500" />
+                          Last Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors shadow-sm"
+                          placeholder="Enter your last name"
+                        />
                       </div>
 
                       {/* Email */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-teal-50 rounded-xl p-4 md:p-5 border-2 border-teal-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-teal-400">
-                          <label className="flex items-center text-sm font-bold text-teal-800 mb-3">
-                            <div className="bg-teal-500 p-2 rounded-lg mr-3">
-                              <Mail className="w-4 h-4 text-white" />
-                            </div>
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
-                            className="w-full px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-teal-200 focus:border-teal-500 transition-all duration-300 placeholder-teal-400 text-base"
-                            placeholder="your.email@example.com"
-                          />
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-blue-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Mail className="w-4 h-4 mr-2 text-blue-500" />
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm"
+                          placeholder="your.email@example.com"
+                        />
                       </div>
 
                       {/* Phone */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-teal-50 rounded-xl p-4 md:p-5 border-2 border-teal-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-teal-400">
-                          <label className="flex items-center text-sm font-bold text-teal-800 mb-3">
-                            <div className="bg-teal-500 p-2 rounded-lg mr-3">
-                              <Phone className="w-4 h-4 text-white" />
-                            </div>
-                            Phone Number
-                          </label>
-                          <input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => handleInputChange('phone', e.target.value)}
-                            className="w-full px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-teal-200 focus:border-teal-500 transition-all duration-300 placeholder-teal-400 text-base"
-                            placeholder="+252 61 123 4567"
-                          />
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-blue-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Phone className="w-4 h-4 mr-2 text-blue-500" />
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm"
+                          placeholder="+252 61 123 4567"
+                        />
                       </div>
 
                       {/* Gender */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-4 md:p-5 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-orange-400">
-                          <label className="flex items-center text-sm font-bold text-orange-800 mb-3">
-                            <div className="bg-orange-500 p-2 rounded-lg mr-3">
-                              <User className="w-4 h-4 text-white" />
-                            </div>
-                            Gender
-                          </label>
-                          <select
-                            value={formData.gender}
-                            onChange={(e) => handleInputChange('gender', e.target.value)}
-                            className="w-full px-4 py-3 bg-white border-2 border-orange-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 cursor-pointer appearance-none text-base"
-                          >
-                            <option value="">Select your gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                          </select>
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-orange-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <User className="w-4 h-4 mr-2 text-orange-500" />
+                          Gender
+                        </label>
+                        <select
+                          value={formData.gender}
+                          onChange={(e) => handleInputChange('gender', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors shadow-sm"
+                        >
+                          <option value="">Select your gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
                       </div>
 
                       {/* Start Date */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-4 md:p-5 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-400">
-                          <label className="flex items-center text-sm font-bold text-purple-800 mb-3">
-                            <div className="bg-purple-500 p-2 rounded-lg mr-3">
-                              <Calendar className="w-4 h-4 text-white" />
-                            </div>
-                            Start Date *
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.startDate}
-                            onChange={(e) => handleInputChange('startDate', e.target.value)}
-                            min={getMinDate()}
-                            className="w-full px-4 py-3 bg-white border-2 border-purple-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 cursor-pointer text-base"
-                            style={{
-                              colorScheme: 'light'
-                            }}
-                          />
-                          <p className="text-xs text-purple-600 mt-2">📅 Click to select your travel start date</p>
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-green-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Calendar className="w-4 h-4 mr-2 text-green-500" />
+                          Start Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.startDate}
+                          onChange={(e) => handleInputChange('startDate', e.target.value)}
+                          min={getMinDate()}
+                          className="w-full px-3 py-2 bg-white border border-green-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors shadow-sm"
+                          style={{ colorScheme: 'light' }}
+                        />
                       </div>
 
                       {/* End Date */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-4 md:p-5 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-400">
-                          <label className="flex items-center text-sm font-bold text-purple-800 mb-3">
-                            <div className="bg-purple-500 p-2 rounded-lg mr-3">
-                              <Calendar className="w-4 h-4 text-white" />
-                            </div>
-                            End Date
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.endDate}
-                            onChange={(e) => handleInputChange('endDate', e.target.value)}
-                            min={formData.startDate || getMinDate()}
-                            className="w-full px-4 py-3 bg-white border-2 border-purple-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 cursor-pointer text-base"
-                            style={{
-                              colorScheme: 'light'
-                            }}
-                          />
-                          <p className="text-xs text-purple-600 mt-2">📅 Optional: Select your return date</p>
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-green-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Calendar className="w-4 h-4 mr-2 text-green-500" />
+                          End Date
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.endDate}
+                          onChange={(e) => handleInputChange('endDate', e.target.value)}
+                          min={formData.startDate || getMinDate()}
+                          className="w-full px-3 py-2 bg-white border border-green-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors shadow-sm"
+                          style={{ colorScheme: 'light' }}
+                        />
                       </div>
 
                       {/* Adults */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 md:p-5 border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-400">
-                          <label className="flex items-center text-sm font-bold text-emerald-800 mb-3">
-                            <div className="bg-emerald-500 p-2 rounded-lg mr-3">
-                              <Users className="w-4 h-4 text-white" />
-                            </div>
-                            Adults *
-                          </label>
-                          <select
-                            value={formData.adults}
-                            onChange={(e) => handleInputChange('adults', parseInt(e.target.value))}
-                            className="w-full px-4 py-3 bg-white border-2 border-emerald-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-300 cursor-pointer appearance-none text-base"
-                          >
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                              <option key={n} value={n} className="bg-white text-gray-800 py-2">
-                                {n} Adult{n > 1 ? 's' : ''}
-                              </option>
-                            ))}
-                          </select>
-                          <p className="text-xs text-emerald-600 mt-2">👥 Number of adult travelers</p>
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-purple-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Users className="w-4 h-4 mr-2 text-purple-500" />
+                          Adults *
+                        </label>
+                        <select
+                          value={formData.adults}
+                          onChange={(e) => handleInputChange('adults', parseInt(e.target.value))}
+                          className="w-full px-3 py-2 bg-white border border-purple-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors shadow-sm"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+                            <option key={n} value={n}>
+                              {n} Adult{n > 1 ? 's' : ''}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Children */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 md:p-5 border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-emerald-400">
-                          <label className="flex items-center text-sm font-bold text-emerald-800 mb-3">
-                            <div className="bg-emerald-500 p-2 rounded-lg mr-3">
-                              <Users className="w-4 h-4 text-white" />
-                            </div>
-                            Children
-                          </label>
-                          <select
-                            value={formData.children}
-                            onChange={(e) => handleInputChange('children', parseInt(e.target.value))}
-                            className="w-full px-4 py-3 bg-white border-2 border-emerald-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-300 cursor-pointer appearance-none text-base"
-                          >
-                            {[0, 1, 2, 3, 4, 5].map(n => (
-                              <option key={n} value={n} className="bg-white text-gray-800 py-2">
-                                {n} Child{n !== 1 ? 'ren' : ''}
-                              </option>
-                            ))}
-                          </select>
-                          <p className="text-xs text-emerald-600 mt-2">👶 Children under 12 years old</p>
-                        </div>
+                      <div className="space-y-1 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-purple-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Users className="w-4 h-4 mr-2 text-purple-500" />
+                          Children
+                        </label>
+                        <select
+                          value={formData.children}
+                          onChange={(e) => handleInputChange('children', parseInt(e.target.value))}
+                          className="w-full px-3 py-2 bg-white border border-purple-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors shadow-sm"
+                        >
+                          {[0, 1, 2, 3, 4, 5].map(n => (
+                            <option key={n} value={n}>
+                              {n} Child{n !== 1 ? 'ren' : ''}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Nationality */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-indigo-50 rounded-xl p-4 md:p-5 border-2 border-indigo-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-indigo-400">
-                          <label className="flex items-center text-sm font-bold text-indigo-800 mb-3">
-                            <div className="bg-indigo-500 p-2 rounded-lg mr-3">
-                              <Globe className="w-4 h-4 text-white" />
-                            </div>
-                            Nationality
-                          </label>
-                          <select
-                            value={formData.nationality}
-                            onChange={(e) => handleInputChange('nationality', e.target.value)}
-                            className="w-full px-4 py-3 bg-white border-2 border-indigo-300 rounded-lg text-gray-800 font-medium focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 cursor-pointer appearance-none text-base"
-                          >
-                            <option value="" className="bg-white text-gray-500 py-2">Select your nationality</option>
-                            <option value="Somali" className="bg-white text-gray-800 py-2">🇸🇴 Somali</option>
-                            <option value="Ethiopian" className="bg-white text-gray-800 py-2">🇪🇹 Ethiopian</option>
-                            <option value="Kenyan" className="bg-white text-gray-800 py-2">🇰🇪 Kenyan</option>
-                            <option value="American" className="bg-white text-gray-800 py-2">🇺🇸 American</option>
-                            <option value="British" className="bg-white text-gray-800 py-2">🇬🇧 British</option>
-                            <option value="Canadian" className="bg-white text-gray-800 py-2">🇨🇦 Canadian</option>
-                            <option value="Other" className="bg-white text-gray-800 py-2">🌍 Other</option>
-                          </select>
-                          <p className="text-xs text-indigo-600 mt-2">🌍 This helps us with travel documentation</p>
-                        </div>
+                      <div className="space-y-1 md:col-span-2 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-indigo-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                          <Globe className="w-4 h-4 mr-2 text-indigo-500" />
+                          Nationality
+                        </label>
+                        <select
+                          value={formData.nationality}
+                          onChange={(e) => handleInputChange('nationality', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm"
+                        >
+                          <option value="">Select your nationality</option>
+                          <option value="Somali">🇸🇴 Somali</option>
+                          <option value="Ethiopian">🇪🇹 Ethiopian</option>
+                          <option value="Kenyan">🇰🇪 Kenyan</option>
+                          <option value="American">🇺🇸 American</option>
+                          <option value="British">🇬🇧 British</option>
+                          <option value="Canadian">🇨🇦 Canadian</option>
+                          <option value="German">🇩🇪 German</option>
+                          <option value="French">🇫🇷 French</option>
+                          <option value="Italian">🇮🇹 Italian</option>
+                          <option value="Spanish">🇪🇸 Spanish</option>
+                          <option value="Dutch">🇳🇱 Dutch</option>
+                          <option value="Swedish">🇸🇪 Swedish</option>
+                          <option value="Norwegian">🇳🇴 Norwegian</option>
+                          <option value="Danish">🇩🇰 Danish</option>
+                          <option value="Finnish">🇫🇮 Finnish</option>
+                          <option value="Swiss">🇨🇭 Swiss</option>
+                          <option value="Austrian">🇦🇹 Austrian</option>
+                          <option value="Belgian">🇧🇪 Belgian</option>
+                          <option value="Portuguese">🇵🇹 Portuguese</option>
+                          <option value="Greek">🇬🇷 Greek</option>
+                          <option value="Turkish">🇹🇷 Turkish</option>
+                          <option value="Russian">🇷🇺 Russian</option>
+                          <option value="Polish">🇵🇱 Polish</option>
+                          <option value="Czech">🇨🇿 Czech</option>
+                          <option value="Hungarian">🇭🇺 Hungarian</option>
+                          <option value="Romanian">🇷🇴 Romanian</option>
+                          <option value="Bulgarian">🇧🇬 Bulgarian</option>
+                          <option value="Croatian">🇭🇷 Croatian</option>
+                          <option value="Serbian">🇷🇸 Serbian</option>
+                          <option value="Slovak">🇸🇰 Slovak</option>
+                          <option value="Slovenian">🇸🇮 Slovenian</option>
+                          <option value="Estonian">🇪🇪 Estonian</option>
+                          <option value="Latvian">🇱🇻 Latvian</option>
+                          <option value="Lithuanian">🇱🇹 Lithuanian</option>
+                          <option value="Luxembourgish">🇱🇺 Luxembourgish</option>
+                          <option value="Maltese">🇲🇹 Maltese</option>
+                          <option value="Cypriot">🇨🇾 Cypriot</option>
+                          <option value="Irish">🇮🇪 Irish</option>
+                          <option value="Icelandic">🇮🇸 Icelandic</option>
+                          <option value="Liechtenstein">🇱🇮 Liechtenstein</option>
+                          <option value="Monaco">🇲🇨 Monaco</option>
+                          <option value="San Marino">🇸🇲 San Marino</option>
+                          <option value="Vatican">🇻🇦 Vatican</option>
+                          <option value="Andorra">🇦🇩 Andorra</option>
+                          <option value="Other">🌍 Other</option>
+                        </select>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Step 3: Additional Information */}
+                {/* Step 3: Additional Information - Compact Design */}
                 {step === 3 && (
-                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 md:p-6">
-                    {/* Mobile-First Header */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border border-purple-200 shadow-lg p-4 md:p-6">
+                    {/* Compact Header */}
                     <div className="mb-6">
-                      <div className="text-center md:text-left mb-4">
-                        <h2 className="text-xl md:text-2xl font-bold text-purple-900 mb-2">Additional Information</h2>
-                        <p className="text-sm md:text-base text-purple-700">Optional details to help us serve you better</p>
-                      </div>
-                      {selectedCount > 0 && (
-                        <div className="bg-orange-500 text-white px-4 py-3 rounded-xl font-semibold shadow-lg text-center">
-                          <div className="text-sm">{selectedCount} Services Selected</div>
-                          <div className="text-lg font-bold">${calculateTotal().toFixed(0)}</div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-3 shadow-sm">
+                          <h2 className="text-lg md:text-xl font-bold text-gray-900">Additional Information</h2>
+                          <p className="text-sm text-gray-600">Optional details to help us serve you better</p>
                         </div>
-                      )}
+                        {selectedCount > 0 && (
+                          <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-lg text-sm font-semibold shadow-lg">
+                            {selectedCount} Services - ${calculateTotal().toFixed(0)}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-4 md:space-y-6">
+                    {/* Compact Form Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {/* Dietary Requirements */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-green-50 rounded-xl p-4 md:p-6 border-2 border-green-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-green-400">
-                          <label className="flex items-center text-base md:text-lg font-bold text-green-800 mb-4">
-                            <div className="bg-green-500 p-2 md:p-3 rounded-lg mr-3">
-                              <span className="text-white text-base md:text-lg">🍽️</span>
-                            </div>
-                            Dietary Requirements
-                          </label>
-                          <textarea
-                            value={formData.dietaryRequirements}
-                            onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
-                            className="w-full px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl text-gray-800 font-medium focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all duration-300 placeholder-green-400 resize-none text-base"
-                            rows={4}
-                            placeholder="Tell us about any allergies, dietary restrictions, or special meal preferences you have..."
-                          />
-                          <p className="text-xs text-green-600 mt-2 italic">💡 This helps us prepare the perfect dining experience for you</p>
-                        </div>
+                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-green-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                          <div className="bg-green-500 p-2 rounded-lg mr-3">
+                            <span className="text-white text-sm">🍽️</span>
+                          </div>
+                          Dietary Requirements
+                        </label>
+                        <textarea
+                          value={formData.dietaryRequirements}
+                          onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-green-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors shadow-sm resize-none"
+                          rows={3}
+                          placeholder="Any allergies, dietary restrictions, or special meal preferences..."
+                        />
+                        <p className="text-xs text-green-600 mt-2">💡 Helps us prepare the perfect dining experience</p>
                       </div>
 
                       {/* Special Requests */}
-                      <div className="group">
-                        <div className="bg-gradient-to-br from-white to-pink-50 rounded-xl p-4 md:p-6 border-2 border-pink-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-pink-400">
-                          <label className="flex items-center text-base md:text-lg font-bold text-pink-800 mb-4">
-                            <div className="bg-pink-500 p-2 md:p-3 rounded-lg mr-3">
-                              <span className="text-white text-base md:text-lg">✨</span>
-                            </div>
-                            Special Requests
-                          </label>
-                          <textarea
-                            value={formData.specialRequests}
-                            onChange={(e) => handleInputChange('specialRequests', e.target.value)}
-                            className="w-full px-4 md:px-5 py-3 md:py-4 bg-gradient-to-r from-pink-50 to-rose-50 border-2 border-pink-300 rounded-xl text-gray-800 font-medium focus:ring-4 focus:ring-pink-200 focus:border-pink-500 transition-all duration-300 placeholder-pink-400 resize-none text-base"
-                            rows={4}
-                            placeholder="Share any accessibility needs, celebration occasions, specific preferences, or anything else that would make your trip special..."
-                          />
-                          <p className="text-xs text-pink-600 mt-2 italic">🎉 We love making your experience memorable and personalized</p>
-                        </div>
+                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-pink-200">
+                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                          <div className="bg-pink-500 p-2 rounded-lg mr-3">
+                            <span className="text-white text-sm">✨</span>
+                          </div>
+                          Special Requests
+                        </label>
+                        <textarea
+                          value={formData.specialRequests}
+                          onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-pink-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors shadow-sm resize-none"
+                          rows={3}
+                          placeholder="Accessibility needs, celebrations, or special preferences..."
+                        />
+                        <p className="text-xs text-pink-600 mt-2">🎉 We love making your experience memorable</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Mobile-First Navigation Buttons */}
-                <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200">
-                  {/* Mobile Layout */}
-                  <div className="md:hidden space-y-4">
-                    {/* Help Link */}
-                    <div className="text-center">
-                      <a
-                        href="https://wa.me/252907797695"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-teal-600 hover:text-teal-800 font-medium inline-flex items-center"
-                      >
-                        <span className="mr-2">💬</span>
-                        Need help? WhatsApp us
-                      </a>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                      {step > 1 && (
-                        <button
-                          onClick={() => handleStepChange(step - 1)}
-                          className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-teal-300 rounded-xl text-sm font-semibold text-teal-700 hover:bg-teal-50 transition-all duration-200"
-                        >
-                          <ArrowLeft className="w-4 h-4 mr-2" />
-                          Back
-                        </button>
-                      )}
-
+                {/* Compact Responsive Navigation */}
+                <div className="mt-4 md:mt-6 pt-4 border-t border-gray-200">
+                  {/* Action Buttons - Responsive */}
+                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                    {step > 1 && (
                       <button
-                        onClick={() => handleStepChange(step + 1)}
-                        disabled={!canProceed(step)}
-                        className={`flex-1 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${canProceed(step)
-                          ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          }`}
+                        onClick={() => handleStepChange(step - 1)}
+                        className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        {step === 3 ? 'Review Booking' : 'Continue'}
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back
                       </button>
-                    </div>
+                    )}
+
+                    <button
+                      onClick={() => handleStepChange(step + 1)}
+                      disabled={!canProceed(step)}
+                      className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${canProceed(step)
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                    >
+                      {step === 3 ? 'Review Booking' : 'Continue'}
+                    </button>
                   </div>
 
-                  {/* Desktop Layout */}
-                  <div className="hidden md:flex justify-between items-center">
-                    <div>
-                      {step > 1 && (
-                        <button
-                          onClick={() => handleStepChange(step - 1)}
-                          className="flex items-center px-6 py-3 border-2 border-teal-300 rounded-lg text-sm font-semibold text-teal-700 hover:bg-teal-50 transition-all duration-200"
-                        >
-                          <ArrowLeft className="w-4 h-4 mr-2" />
-                          Back
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                      <a
-                        href="https://wa.me/252907797695"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-teal-600 hover:text-teal-800 font-medium"
-                      >
-                        Need help? WhatsApp us
-                      </a>
-
-                      <button
-                        onClick={() => handleStepChange(step + 1)}
-                        disabled={!canProceed(step)}
-                        className={`px-8 py-3 rounded-lg text-sm font-bold transition-all duration-200 ${canProceed(step)
-                          ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg transform hover:scale-105'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          }`}
-                      >
-                        {step === 3 ? 'Review Booking' : 'Continue'}
-                      </button>
-                    </div>
+                  {/* Help Link - Always visible */}
+                  <div className="text-center">
+                    <a
+                      href="https://wa.me/252907793854"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs md:text-sm text-gray-600 hover:text-orange-600 font-medium inline-flex items-center transition-colors"
+                    >
+                      <span className="mr-1">💬</span>
+                      Need help? WhatsApp us
+                    </a>
                   </div>
                 </div>
               </div>

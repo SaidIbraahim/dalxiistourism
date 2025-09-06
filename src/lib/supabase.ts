@@ -12,7 +12,7 @@ console.log('Anon Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}.
 // Fetch with timeout to prevent indefinite hanging during network/DNS issues
 const fetchWithTimeout = async (input: RequestInfo, init?: RequestInit & { timeout?: number }) => {
   const controller = new AbortController();
-  const timeoutMs = init?.timeout ?? 30000; // Increased to 30s to match DataService timeout
+  const timeoutMs = init?.timeout ?? 60000; // Increased to 60s for better reliability
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const { timeout, signal, ...rest } = init || {};
   try {

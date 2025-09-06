@@ -18,7 +18,7 @@ const EmergencyContact: React.FC = () => {
           Emergency Hotline
         </a>
         <a
-          href="https://wa.me/252907797695?text=EMERGENCY: I need immediate assistance"
+          href="https://wa.me/252907793854?text=EMERGENCY: I need immediate assistance"
           target="_blank"
           rel="noopener noreferrer"
           className={`border-2 ${brandClasses.border.secondary} ${brandClasses.text.secondary} px-8 py-3 rounded-full font-semibold ${brandClasses.hover.secondary} hover:text-white transition-colors inline-flex items-center justify-center`}

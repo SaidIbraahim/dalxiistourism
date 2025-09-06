@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import {
@@ -17,6 +17,7 @@ type DashboardSection = 'overview' | 'bookings' | 'financial' | 'reports' | 'cms
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState<DashboardSection>('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -42,6 +43,7 @@ const AdminDashboard: React.FC = () => {
     try {
       await logout();
       showToast('success', 'Success', 'Logged out successfully');
+      navigate('/admin/login');
     } catch (error) {
       showToast('error', 'Error', 'Logout failed');
     }
@@ -196,7 +198,7 @@ const AdminDashboard: React.FC = () => {
           
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200 ${
+            className={`w-full flex items-center rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 border border-red-200 hover:border-red-300 ${
               sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'
             }`}
             title={sidebarCollapsed ? 'Logout' : undefined}
@@ -228,6 +230,14 @@ const AdminDashboard: React.FC = () => {
               <div className="text-sm text-gray-500">
                 Welcome back, {user?.user_metadata?.full_name || 'Admin'}
               </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 hover:text-red-700 hover:border-red-300 transition-all duration-200"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </header>

@@ -223,7 +223,7 @@ const PremiumTestimonialsSection = () => {
         {/* CTA */}
         <div className="text-center mt-12">
           <a
-            href="https://wa.me/252907797695?text=Hi! I'd like to share my experience with Dalxiis Tourism and possibly book another trip."
+            href="https://wa.me/252907793854?text=Hi! I'd like to share my experience with Dalxiis Tourism and possibly book another trip."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center bg-[#f29520] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#e08420] transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-[#f29520]/50"

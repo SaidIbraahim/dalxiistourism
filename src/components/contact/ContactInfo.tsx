@@ -37,7 +37,7 @@ const contactInfo: ContactInfoItem[] = [
     title: 'WhatsApp',
     details: ['+252 907 797 695', 'Instant messaging & support'],
     action: 'Chat Now',
-    actionLink: 'https://wa.me/252907797695'
+    actionLink: 'https://wa.me/252907793854'
   }
 ];
 

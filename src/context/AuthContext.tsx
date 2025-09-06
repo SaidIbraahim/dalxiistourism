@@ -47,10 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 				// Production mode: Non-blocking authentication check
 				console.log('🔐 Production mode: Checking for existing session...');
 				
-				// Use a shorter timeout and don't block the app
+				// Increased timeout for better reliability
 				const sessionPromise = supabase.auth.getSession();
 				const timeoutPromise = new Promise((_, reject) => 
-					setTimeout(() => reject(new Error('Session check timeout')), 5000)
+					setTimeout(() => reject(new Error('Session check timeout')), 15000)
 				);
 				
 				try {
@@ -109,11 +109,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		try {
 			console.log('🔐 Checking role for user ID:', userId);
 			
-			const { data, error } = await supabase
+			// Add timeout to prevent hanging
+			const timeoutPromise = new Promise((_, reject) => 
+				setTimeout(() => reject(new Error('Role check timeout')), 10000)
+			);
+			
+			const rolePromise = supabase
 				.from('profiles')
 				.select('role, is_active')
 				.eq('id', userId)
 				.single();
+				
+			const { data, error } = await Promise.race([
+				rolePromise,
+				timeoutPromise
+			]) as any;
 				
 			if (error) {
 				console.error('❌ Profile role check error:', error);
@@ -136,6 +146,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		} catch (error) {
 			console.error('❌ Role check exception:', error);
 			setIsAdmin(false);
+			// Don't clear session on timeout, just set admin to false
+			if (error.message !== 'Role check timeout') {
+				setIsAuthenticated(false);
+				setUser(null);
+			}
 			return false;
 		}
 	};
@@ -192,13 +207,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 			setUser(data.user);
 			setIsAuthenticated(true);
 			
-			// Check user role
-			const allowed = await checkRole(data.user.id);
-			if (!allowed) {
-				console.error('❌ User role check failed');
-				setIsAuthenticated(false);
-				setUser(null);
-				return { success: false, error: 'Access restricted to Dalxiis staff' };
+			// Check user role with timeout handling
+			try {
+				const allowed = await checkRole(data.user.id);
+				if (!allowed) {
+					console.error('❌ User role check failed');
+					setIsAuthenticated(false);
+					setUser(null);
+					return { success: false, error: 'Access restricted to Dalxiis staff' };
+				}
+			} catch (roleError: any) {
+				console.error('❌ Role check failed:', roleError);
+				// If role check times out, still allow login but set admin to false
+				if (roleError.message === 'Role check timeout') {
+					console.warn('⚠️ Role check timed out, allowing login but restricting admin access');
+					setIsAdmin(false);
+				} else {
+					setIsAuthenticated(false);
+					setUser(null);
+					return { success: false, error: 'Role verification failed' };
+				}
 			}
 			
 			console.log('✅ Login successful, user is admin');

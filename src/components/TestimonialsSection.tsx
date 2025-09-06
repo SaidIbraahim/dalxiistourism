@@ -88,7 +88,7 @@ const TestimonialsSection = () => {
         
         <div className="text-center mt-12">
           <a
-            href="https://wa.me/252907797695"
+            href="https://wa.me/252907793854"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[#f29520] text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-[#e08420] transition-colors"

@@ -318,11 +318,21 @@ export class BookingsService {
     try {
       console.log('📝 BookingsService: Creating booking with data:', bookingData);
       
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Booking creation timeout')), 20000)
+      );
+      
+      const bookingPromise = supabase
         .from('bookings')
         .insert(bookingData)
         .select()
         .single();
+
+      const { data, error } = await Promise.race([
+        bookingPromise,
+        timeoutPromise
+      ]) as any;
 
       console.log('📝 BookingsService: Supabase response:', { data, error });
 

@@ -215,7 +215,7 @@ const DestinationsPage = () => {
               Contact us for detailed location information and directions.
             </p>
             <button
-              onClick={() => window.open('https://wa.me/252907797695?text=Hi! I need directions and location information for destinations in Puntland.', '_blank')}
+              onClick={() => window.open('https://wa.me/252907793854?text=Hi! I need directions and location information for destinations in Puntland.', '_blank')}
               className={`bg-white ${brandClasses.text.primary} px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors`}
             >
               Get Directions
@@ -230,7 +230,7 @@ const DestinationsPage = () => {
             Let our local experts help you discover the hidden gems of these beautiful destinations
           </p>
           <button
-            onClick={() => window.open('https://wa.me/252907797695?text=Hi! I want to explore Puntland destinations. Can you help me plan my trip?', '_blank')}
+            onClick={() => window.open('https://wa.me/252907793854?text=Hi! I want to explore Puntland destinations. Can you help me plan my trip?', '_blank')}
             className={`${brandClasses.bg.secondary} text-white px-8 py-3 rounded-full font-semibold ${brandClasses.hover.secondary} transition-colors`}
           >
             Start Planning Your Journey

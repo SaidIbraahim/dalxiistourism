@@ -180,7 +180,7 @@ const HomePage = () => {
               </Link>
               
               <a
-                href="https://wa.me/252907797695?text=Hi! I'm interested in planning a trip to Somalia. Can you help me get started?"
+                href="https://wa.me/252907793854?text=Hi! I'm interested in planning a trip to Somalia. Can you help me get started?"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`group border-2 ${brandClasses.border.secondary} ${brandClasses.text.secondary} px-10 py-5 rounded-full font-bold text-lg ${brandClasses.hover.secondary} hover:text-white transition-all duration-500 inline-flex items-center justify-center transform hover:scale-105 hover:-translate-y-1 backdrop-blur-sm`}

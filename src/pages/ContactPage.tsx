@@ -50,7 +50,7 @@ ${message}
 Please get back to me at your earliest convenience. Thank you!`;
 
     const encodedMessage = encodeURIComponent(whatsappMessage);
-    window.open(`https://wa.me/252907797695?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/252907793854?text=${encodedMessage}`, '_blank');
   };
 
   return (

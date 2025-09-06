@@ -149,7 +149,7 @@ export default function BookingReviewPage() {
                 </button>
 
                 <a
-                  href="https://wa.me/252907797695"
+                  href="https://wa.me/252907793854"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-green-500 text-white py-3 px-4 rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors flex items-center justify-center"
@@ -165,11 +165,11 @@ export default function BookingReviewPage() {
                 <div className="text-sm text-gray-500 space-y-1">
                   <div className="flex items-center">
                     <span className="mr-2">📧</span>
-                    support@dalxiis.com
+                    dalxiistta@gmail.com
                   </div>
                   <div className="flex items-center">
                     <span className="mr-2">📞</span>
-                    +252 905 345 879
+                    +252 907793854
                   </div>
                 </div>
               </div>

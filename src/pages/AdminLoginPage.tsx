@@ -52,7 +52,7 @@ const AdminLoginPage: React.FC = () => {
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center px-4"
+      className="relative min-h-screen flex items-center justify-center px-4 py-8"
     >
       {/* Background image (local file) with smooth loading */}
       <div
@@ -71,7 +71,7 @@ const AdminLoginPage: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-sm">
         {/* Loading indicator while image loads */}
         {!imageLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl">
@@ -81,24 +81,24 @@ const AdminLoginPage: React.FC = () => {
             </div>
           </div>
         )}
-        {/* Login Card */}
-        <div className="backdrop-blur-md bg-white/20 rounded-2xl shadow-2xl p-10 md:p-12 border border-white/30">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white">Admin Login</h1>
-            <div className="mt-3 flex justify-center">
-              <span className="h-1.5 w-14 rounded-full bg-[#f29520]" />
+        {/* Login Card - Smaller and more compact */}
+        <div className="backdrop-blur-md bg-white/20 rounded-2xl shadow-2xl p-6 md:p-8 border border-white/30">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-white">Admin Login</h1>
+            <div className="mt-2 flex justify-center">
+              <span className="h-1 w-12 rounded-full bg-[#f29520]" />
             </div>
           </div>
 
           {/* Login Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-xs font-medium text-gray-200 mb-2">
                 Username / Email
               </label>
               <div className="group relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 transition-colors group-focus-within:text-[#f29520]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-[#f29520]" />
                 <input
                   id="email"
                   name="email"
@@ -107,7 +107,7 @@ const AdminLoginPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white/70 text-gray-900 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#f29520] focus:border-[#f29520] transition-colors placeholder:text-gray-500"
+                  className="w-full pl-9 pr-4 py-2.5 bg-white/70 text-gray-900 border border-white/60 rounded-lg focus:ring-2 focus:ring-[#f29520] focus:border-[#f29520] transition-colors placeholder:text-gray-500 text-sm"
                   placeholder="Enter your email"
                 />
               </div>
@@ -119,7 +119,7 @@ const AdminLoginPage: React.FC = () => {
                 Password
               </label>
               <div className="group relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 transition-colors group-focus-within:text-[#f29520]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 transition-colors group-focus-within:text-[#f29520]" />
                 <input
                   id="password"
                   name="password"
@@ -128,7 +128,7 @@ const AdminLoginPage: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 bg-white/70 text-gray-900 border border-white/60 rounded-xl focus:ring-2 focus:ring-[#f29520] focus:border-[#f29520] transition-colors placeholder:text-gray-500"
+                  className="w-full pl-9 pr-9 py-2.5 bg-white/70 text-gray-900 border border-white/60 rounded-lg focus:ring-2 focus:ring-[#f29520] focus:border-[#f29520] transition-colors placeholder:text-gray-500 text-sm"
                   placeholder="Enter your password"
                 />
                 <button
@@ -137,7 +137,7 @@ const AdminLoginPage: React.FC = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {/* Forgot Password */}
@@ -152,11 +152,11 @@ const AdminLoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#f29520] text-white py-3 px-4 rounded-xl font-semibold shadow-md hover:shadow-lg hover:bg-[#e08518] focus:outline-none focus:ring-2 focus:ring-[#f29520] focus:ring-offset-2 focus:ring-offset-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#f29520] text-white py-2.5 px-4 rounded-lg font-semibold shadow-md hover:shadow-lg hover:bg-[#e08518] focus:outline-none focus:ring-2 focus:ring-[#f29520] focus:ring-offset-2 focus:ring-offset-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Signing in...
                 </div>
               ) : (
@@ -166,21 +166,21 @@ const AdminLoginPage: React.FC = () => {
           </form>
 
           {/* Card bottom accent line */}
-          <div className="mt-8 h-1 rounded-full bg-[#f29520]/70" />
+          <div className="mt-6 h-1 rounded-full bg-[#f29520]/70" />
         </div>
 
         {/* Go Back to Home Page */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center w-full border-2 border-[#f29520] text-[#f29520] rounded-xl py-2.5 font-semibold transition-colors bg-white/80 hover:bg-[#f29520] hover:text-white"
+            className="inline-flex items-center justify-center w-full border-2 border-[#f29520] text-[#f29520] rounded-lg py-2 font-semibold transition-colors bg-white/80 hover:bg-[#f29520] hover:text-white text-sm"
           >
             Go Back to Home Page
           </Link>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-white/80 text-xs">
+        <div className="mt-6 text-center text-white/80 text-xs">
           <p>&copy; 2025 Dalxiis Tourism. All rights reserved.</p>
         </div>
       </div>

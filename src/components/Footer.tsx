@@ -87,7 +87,7 @@ const Footer = () => {
               <div className="flex items-center">
                 <MessageCircle className="h-5 w-5 mr-3 text-[#f29520]" />
                 <a 
-                  href="https://wa.me/252907797695" 
+                  href="https://wa.me/252907793854" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 text-sm hover:text-[#f29520] transition-colors"

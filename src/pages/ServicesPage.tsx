@@ -159,7 +159,7 @@ const ServicesPage = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
-                    onClick={() => window.open(`https://wa.me/252907797695?text=Hi! I'm interested in your ${service.title.toLowerCase()} service. Can you provide more details?`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/252907793854?text=Hi! I'm interested in your ${service.title.toLowerCase()} service. Can you provide more details?`, '_blank')}
                     className={`flex-1 ${brandClasses.bg.secondary} text-white px-6 py-3 rounded-lg font-semibold ${brandClasses.hover.secondary} transition-colors flex items-center justify-center`}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
@@ -204,7 +204,7 @@ const ServicesPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => window.open('https://wa.me/252907797695?text=Hi! I need help choosing the right services for my trip to Somalia.', '_blank')}
+              onClick={() => window.open('https://wa.me/252907793854?text=Hi! I need help choosing the right services for my trip to Somalia.', '_blank')}
               className={`${brandClasses.bg.secondary} text-white px-8 py-3 rounded-full font-semibold ${brandClasses.hover.secondary} transition-colors inline-flex items-center justify-center`}
             >
               <MessageCircle className="mr-2 h-5 w-5" />

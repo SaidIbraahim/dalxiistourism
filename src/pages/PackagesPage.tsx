@@ -72,7 +72,7 @@ const PackagesPage = () => {
             We can create personalized tour packages based on your preferences and requirements
           </p>
           <button
-            onClick={() => window.open('https://wa.me/252907797695?text=Hi! I would like to discuss a custom tour package.', '_blank')}
+            onClick={() => window.open('https://wa.me/252907793854?text=Hi! I would like to discuss a custom tour package.', '_blank')}
             className={`${brandClasses.bg.secondary} text-white px-8 py-3 rounded-full font-semibold ${brandClasses.hover.secondary} transition-colors`}
           >
             Contact for Custom Package
