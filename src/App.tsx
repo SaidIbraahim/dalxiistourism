@@ -20,7 +20,7 @@ import ClientDetailPageWrapper from './pages/admin/ClientDetailPageWrapper';
 
 // Helper component to handle conditional routing
 function DalxiisRoutes() {
-  const { isAdmin, isAuthenticated, isLoading } = useAuth();
+  const { isAdmin, isAuthenticated, isLoading, isRoleLoading, isRoleResolved } = useAuth();
   const location = useLocation();
 
   // Debug logging
@@ -33,6 +33,12 @@ function DalxiisRoutes() {
 
   // Check if user is trying to access admin routes
   const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // Always allow admin login page to render immediately
+  if (location.pathname === '/admin/login') {
+    console.log('Showing admin login page');
+    return <AdminLoginPage />;
+  }
 
   // Show loading during authentication ONLY for admin routes
   if (isLoading && isAdminRoute) {
@@ -47,16 +53,23 @@ function DalxiisRoutes() {
     );
   }
 
-  // If user is on admin login page, always show it (no redirects)
-  if (location.pathname === '/admin/login') {
-    console.log('Showing admin login page');
-    return <AdminLoginPage />;
-  }
-
   // If user is trying to access other admin routes but not authenticated, redirect to login
   if (isAdminRoute && !isAuthenticated) {
     console.log('Redirecting to admin login');
     return <Navigate to="/admin/login" replace />;
+  }
+
+  // Wait for role resolution before redirecting non-admins
+  if (isAdminRoute && isAuthenticated && !isAdmin && (!isRoleResolved || isRoleLoading || isLoading)) {
+    console.log('Waiting for role check to complete...');
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying access...</p>
+        </div>
+      </div>
+    );
   }
 
   // If user is not admin but trying to access admin routes, redirect to home

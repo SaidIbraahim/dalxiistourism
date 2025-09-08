@@ -6,8 +6,7 @@ import {
   ServicesService,
   FinancialService,
   AuthService,
-  StorageService,
-  type ApiResponse
+  StorageService
 } from './api';
 import type { Tables, Inserts, Updates } from '../lib/supabase';
 import { fallbackPackages, fallbackDestinations, fallbackServices } from '../data/fallbackData';
@@ -41,9 +40,9 @@ export class DataService {
     try {
       console.log('📦 DataService: Fetching packages from API...');
       
-      // Shorter timeout to prevent blocking UI
+      // Simple timeout for data fetch
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 30000) // 30 seconds timeout
       );
       
       const response = await Promise.race([
@@ -191,20 +190,30 @@ export class DataService {
 
   // Bookings
   static async fetchBookings(page: number = 1, limit: number = 10) {
-    this.store.setLoading('bookings', true);
+    const cacheKey = `bookings_${page}_${limit}`;
     this.store.setError('bookings', null);
+
+    // Serve from cache immediately to avoid spinners
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      this.store.setBookings(cached);
+    } else {
+      this.store.setLoading('bookings', true);
+    }
 
     try {
       const response = await BookingsService.getBookings(page, limit);
-      
       if (response.success && response.data) {
+        cacheService.set(cacheKey, response.data, 2 * 60 * 1000); // cache 2 min
         this.store.setBookings(response.data);
         return response;
       } else {
+        if (!cached) this.store.setLoading('bookings', false);
         this.store.setError('bookings', response.error?.message || 'Failed to fetch bookings');
         return response;
       }
     } catch (error: any) {
+      if (!cached) this.store.setLoading('bookings', false);
       this.store.setError('bookings', error.message || 'Failed to fetch bookings');
       return {
         success: false,
@@ -294,9 +303,9 @@ export class DataService {
     try {
       console.log('🏝️ DataService: Fetching destinations from API...');
       
-      // Shorter timeout to prevent blocking UI
+      // Simple timeout for data fetch
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 30000) // 30 seconds timeout
       );
       
       const response = await Promise.race([
@@ -422,9 +431,9 @@ export class DataService {
     this.store.setError('services', null);
 
     try {
-      // Add timeout to prevent blocking
+      // Simple timeout for data fetch
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout')), 30000) // 30 seconds timeout
       );
       
       const response = await Promise.race([
@@ -753,7 +762,8 @@ export class DataService {
         // Update user profile with new avatar URL
         const currentUser = this.store.user;
         if (currentUser) {
-          this.store.updateUser({ ...currentUser, avatar_url: response.data });
+          // Note: updateUser method may not exist in the store, using setUser instead
+          this.store.setUser({ ...currentUser, avatar_url: response.data });
         }
         return response;
       }

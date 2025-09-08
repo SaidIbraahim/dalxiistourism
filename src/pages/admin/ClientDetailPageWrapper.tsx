@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { BookingsService } from '../../services/api';
+import { cacheService } from '../../services/CacheService';
 import ClientDetailPage from './ClientDetailPage';
 
 const ClientDetailPageWrapper: React.FC = () => {
@@ -15,7 +16,14 @@ const ClientDetailPageWrapper: React.FC = () => {
 
   const loadBookings = async () => {
     try {
-      setLoading(true);
+      const cacheKey = 'client_detail_bookings_200';
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        setBookings(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       console.log('Starting to load bookings...');
       
       // Add timeout to prevent infinite loading
@@ -23,7 +31,7 @@ const ClientDetailPageWrapper: React.FC = () => {
         setTimeout(() => reject(new Error('Request timeout')), 10000)
       );
       
-      const bookingsPromise = BookingsService.getBookings(1, 1000);
+      const bookingsPromise = BookingsService.getBookings(1, 200);
       
       const response = await Promise.race([bookingsPromise, timeoutPromise]) as any;
       
@@ -32,6 +40,7 @@ const ClientDetailPageWrapper: React.FC = () => {
       if (response.success && response.data) {
         console.log('Bookings loaded successfully:', response.data.length, 'bookings');
         setBookings(response.data as any[]);
+        cacheService.set(cacheKey, response.data, 2 * 60 * 1000);
       } else {
         console.error('Bookings API error:', response.error);
         throw new Error(response.error?.message || 'Failed to fetch bookings');
@@ -110,17 +119,7 @@ const ClientDetailPageWrapper: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading customer data...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Always render the page; it will show skeletons while loading
   return <ClientDetailPage bookings={bookings} />;
 };
 

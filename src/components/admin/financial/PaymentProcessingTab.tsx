@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../../context/ToastContext';
 import { supabase } from '../../../lib/supabase';
+import { cacheService } from '../../../services/CacheService';
 import PaymentModal from '../booking/payment/PaymentModal';
 import ConfirmedBookingsList from './ConfirmedBookingsList';
 import PaymentSearchBar from './PaymentSearchBar';
@@ -49,19 +50,19 @@ const PaymentProcessingTab: React.FC = () => {
 
   const loadConfirmedBookings = async () => {
     try {
-      setLoading(true);
+      const cacheKey = 'confirmed_bookings_payments';
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        setBookings(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       
-      // Load only confirmed bookings with related names using LEFT JOINs
+      // Load only minimal fields required for list view
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-          id, customer_name, customer_email, total_amount, status, payment_status, booking_date, created_at,
-          tour_packages(name),
-          destinations(name),
-          payment_records(
-            id, amount, payment_method, discount_type, discount_value, created_at
-          )
-        `)
+        .select('id, customer_name, customer_email, total_amount, status, payment_status, booking_date, created_at')
         .eq('status', 'confirmed')
         .order('created_at', { ascending: false });
 
@@ -78,6 +79,7 @@ const PaymentProcessingTab: React.FC = () => {
       
       console.log('Loaded confirmed bookings:', processedBookings);
       setBookings(processedBookings);
+      cacheService.set(cacheKey, processedBookings, 2 * 60 * 1000);
 
     } catch (error: any) {
       console.error('Error loading confirmed bookings:', error);
@@ -163,13 +165,13 @@ const PaymentProcessingTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className={`${typography.h2} text-gray-900`}>Payment Processing</h2>
+             {/* Header */}
+       <div className="flex items-center justify-between">
+         <div>
+           <h2 className={`${typography.h2} text-gray-900`}>Payment Processing</h2>
           <p className={`${typography.body} text-gray-600 mt-1`}>Process payments for confirmed bookings</p>
-        </div>
-      </div>
+         </div>
+       </div>
 
       {/* Search Bar */}
       <PaymentSearchBar
@@ -179,21 +181,21 @@ const PaymentProcessingTab: React.FC = () => {
       />
 
       {/* Confirmed Bookings List */}
-      <div className={components.card.base}>
-        <div className={`${componentSizes.card.padding} border-b border-gray-200`}>
+         <div className={components.card.base}>
+           <div className={`${componentSizes.card.padding} border-b border-gray-200`}>
           <h3 className={`${typography.h3} text-gray-900`}>Confirmed Bookings</h3>
           <p className={`${typography.body} text-gray-600`}>
             Confirmed bookings ready for payment processing
           </p>
-        </div>
-        <div className={componentSizes.card.padding}>
+           </div>
+           <div className={componentSizes.card.padding}>
           <ConfirmedBookingsList
             bookings={filteredBookings}
             onProcessPayment={handleProcessPayment}
             loading={loading}
           />
-        </div>
-      </div>
+                        </div>
+                      </div>
 
       {/* Payment Modal */}
       {isPaymentModalOpen && selectedBooking && (

@@ -9,17 +9,17 @@ console.log('🔧 Supabase Configuration:');
 console.log('URL:', supabaseUrl);
 console.log('Anon Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'NOT SET');
 
-// Fetch with timeout to prevent indefinite hanging during network/DNS issues
-const fetchWithTimeout = async (input: RequestInfo, init?: RequestInit & { timeout?: number }) => {
+// Simple fetch with timeout to prevent hanging
+const fetchWithTimeout = async (input: RequestInfo, init?: RequestInit) => {
   const controller = new AbortController();
-  const timeoutMs = init?.timeout ?? 60000; // Increased to 60s for better reliability
+  const timeoutMs = 60000; // 60 seconds timeout
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const { timeout, signal, ...rest } = init || {};
+  
   try {
-    const response = await fetch(input, { ...rest, signal: controller.signal });
+    const response = await fetch(input, { ...init, signal: controller.signal });
     return response;
   } catch (error) {
-    console.error('🌐 Supabase request error:', error);
+    console.warn('🌐 Supabase request failed:', error.message);
     throw error;
   } finally {
     clearTimeout(timer);
@@ -31,7 +31,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce' // Use PKCE flow for better security
+    flowType: 'pkce', // Use PKCE flow for better security
+    refreshTokenRotationEnabled: true, // Enable token rotation for better security
+    debug: false // Set to true for debugging auth issues
   },
   realtime: {
     params: {
@@ -45,6 +47,29 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     fetch: (input, init) => fetchWithTimeout(input as RequestInfo, init as RequestInit)
   }
 });
+
+// Connection health check utility
+export const checkSupabaseConnection = async (): Promise<{ isConnected: boolean; error?: string }> => {
+  try {
+    console.log('🔍 Checking Supabase connection...');
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      console.warn('⚠️ Supabase connection check failed:', error.message);
+      return { isConnected: false, error: error.message };
+    }
+    
+    console.log('✅ Supabase connection successful');
+    return { isConnected: true };
+  } catch (error: any) {
+    console.error('❌ Supabase connection check error:', error.message);
+    return { isConnected: false, error: error.message };
+  }
+};
 
 // Storage utility functions
 export const storage = {

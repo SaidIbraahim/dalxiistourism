@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Receipt, Ticket, Download, Printer, Eye, FileText, Calendar, User, Package, DollarSign } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext';
 import { supabase } from '../../../lib/supabase';
+import { cacheService } from '../../../services/CacheService';
 import { colors, typography, componentSizes, borderRadius, shadows, components } from '../../../styles/designSystem';
 import { formatBookingId } from '../../../utils/bookingIdGenerator';
 import DocumentPreviewModal from '../booking/receipts/DocumentPreviewModal';
@@ -65,12 +66,21 @@ const ReceiptManagementTab: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setLoading(true);
+      const cacheKey = 'receipt_management_data';
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        setBookings(cached.bookings || []);
+        setPayments(cached.payments || []);
+        setDocuments(cached.documents || []);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       
       // Load confirmed and paid bookings
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select('*')
+        .select('id, customer_name, total_amount, status, payment_status, created_at')
         .in('status', ['confirmed', 'completed'])
         .in('payment_status', ['paid'])
         .order('created_at', { ascending: false });
@@ -81,7 +91,7 @@ const ReceiptManagementTab: React.FC = () => {
       // Load payment records
       const { data: paymentsData, error: paymentsError } = await supabase
         .from('payment_records')
-        .select('*')
+        .select('id, booking_id, customer_name, amount, payment_method, status, created_at')
         .eq('type', 'payment')
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
@@ -100,7 +110,7 @@ const ReceiptManagementTab: React.FC = () => {
       // Load document records (if table exists)
       const { data: documentsData, error: documentsError } = await supabase
         .from('document_records')
-        .select('*')
+        .select('id, booking_id, customer_name, document_type, generated_at, print_count, document_url, status')
         .order('generated_at', { ascending: false });
 
       if (documentsError) {
@@ -113,6 +123,8 @@ const ReceiptManagementTab: React.FC = () => {
       } else {
         setDocuments(documentsData || []);
       }
+
+      cacheService.set(cacheKey, { bookings: bookingsData || [], payments: paymentsData || [], documents: documentsData || [] }, 2 * 60 * 1000);
 
     } catch (error: any) {
       console.error('Error loading data:', error);

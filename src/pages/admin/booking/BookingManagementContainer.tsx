@@ -248,17 +248,21 @@ const BookingManagementContainer: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Show lightweight skeletons instead of a blocking spinner
+  if (loading && bookings.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">Loading booking data...</div>
+          <div className="text-sm text-gray-500">Preparing bookings…</div>
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f29520] mx-auto mb-4"></div>
-            <p className="text-gray-600">Fetching bookings from database...</p>
-          </div>
+        <div className="grid grid-cols-1 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-3"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          ))}
         </div>
       </div>
     );

@@ -19,6 +19,7 @@ import BookingActionService from '../../services/bookingActionService';
 import { ClientService } from '../../services/clientService';
 import { ClientExportService } from '../../services/clientExportService';
 import { formatBookingId } from '../../utils/bookingIdGenerator';
+import { cacheService } from '../../services/CacheService';
 
 // Utility function to extract package name from booking data
 const getPackageName = (booking: any): string => {
@@ -194,7 +195,16 @@ const ClientDetailPage: React.FC<ClientDetailPageProps> = ({ bookings }) => {
 
   const loadCustomerData = async (email: string) => {
     console.log('Loading customer data for email:', email);
-    setLoading(true);
+    const cacheKey = `client_${email}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      setCustomer(cached.customer);
+      setNotes(cached.notes || []);
+      setActivities(cached.activities || []);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     
     try {
       // Decode the email from URL encoding
@@ -233,6 +243,25 @@ const ClientDetailPage: React.FC<ClientDetailPageProps> = ({ bookings }) => {
         setActivities(clientActivities);
         
         console.log('Customer data loaded successfully:', profile.customer_name);
+        cacheService.set(cacheKey, { customer: {
+          id: profile.customer_email,
+          name: profile.customer_name,
+          email: profile.customer_email,
+          phone: profile.customer_phone || '',
+          nationality: profile.nationality || '',
+          gender: profile.gender || '',
+          totalBookings: clientBookings.length,
+          totalSpent: clientBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0),
+          lastBooking: clientBookings.length > 0 ? clientBookings[0].booking_date : '',
+          status: 'active' as const,
+          joinDate: profile.created_at,
+          bookings: clientBookings,
+          customerType: clientBookings.length > 1 ? 'returning' as const : 'new' as const,
+          averageBookingValue: clientBookings.length > 0 ? clientBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0) / clientBookings.length : 0,
+          daysSinceLastBooking: clientBookings.length > 0 ? Math.floor((Date.now() - new Date(clientBookings[0].created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0,
+          notes: clientNotes.map(note => note.content),
+          tags: []
+        }, notes: clientNotes, activities: clientActivities }, 5 * 60 * 1000);
       } else {
         console.error('Failed to load customer data:', response.error);
         setCustomer(null);
@@ -696,12 +725,26 @@ const ClientDetailPage: React.FC<ClientDetailPageProps> = ({ bookings }) => {
   const startIndex = (safeCurrentPage - 1) * pageSize;
   const currentPageItems = sortedBookings.slice(startIndex, startIndex + pageSize);
 
-  if (loading) {
+  if (loading && !customer) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading customer details...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8 animate-pulse">
+            <div className="h-28 bg-gray-200" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-8 bg-gray-50">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded" />
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 animate-pulse">
+            <div className="h-5 bg-gray-200 w-40 rounded mb-6"></div>
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-4 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1179,7 +1222,7 @@ const ClientDetailPage: React.FC<ClientDetailPageProps> = ({ bookings }) => {
                           {booking.payment_status || 'unpaid'}
                         </span>
                       </div>
-
+                      
                       {/* Payment Details */}
                       <div className="col-span-12 md:col-span-2 mt-3 md:mt-0">
                         {booking.payment_records && booking.payment_records.length > 0 ? (
@@ -1194,22 +1237,22 @@ const ClientDetailPage: React.FC<ClientDetailPageProps> = ({ bookings }) => {
                                   {payment.discount_type && payment.discount_type !== 'none' && (
                                     <span className="text-orange-600 ml-1">
                                       ({payment.discount_type === 'percent' ? `${payment.discount_value}% off` : `$${payment.discount_value} off`})
-                                    </span>
+                              </span>
                                   )}
-                                </div>
+                          </div>
                                 {payment.transaction_id && (
                                   <div className="text-gray-500 font-mono text-xs">
                                     {payment.transaction_id}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                           </div>
                         ) : (
                           <div className="text-xs text-gray-500">No payment records</div>
                         )}
-                      </div>
-                      
+                </div>
+
                       {/* Actions */}
                                             <div className="col-span-12 md:col-span-12 flex items-center gap-3 md:justify-end mt-4 md:mt-0">
                         <BookingActionButtons

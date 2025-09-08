@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, BarChart3, PieChart, Download, Calendar, DollarSign, Users, Package } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { supabase } from '../../lib/supabase';
+import { cacheService } from '../../services/CacheService';
 
 interface BookingAnalytics {
   totalBookings: number;
@@ -39,7 +40,14 @@ const ReportsSection: React.FC = () => {
 
   const fetchAnalytics = async () => {
     try {
-      setLoading(true);
+      const cacheKey = `reports_${dateRange}`;
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        setAnalytics(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       
       // Calculate date range
       const endDate = new Date();
@@ -63,7 +71,7 @@ const ReportsSection: React.FC = () => {
       // Fetch bookings data
       const { data: bookings, error } = await supabase
         .from('bookings')
-        .select('*')
+        .select('id, customer_email, total_amount, status, created_at')
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
 
@@ -72,6 +80,7 @@ const ReportsSection: React.FC = () => {
       // Process analytics
       const processedAnalytics = processBookingData(bookings || []);
       setAnalytics(processedAnalytics);
+      cacheService.set(cacheKey, processedAnalytics, 2 * 60 * 1000);
       
     } catch (error: any) {
       console.error('Error fetching analytics:', error);
@@ -187,11 +196,21 @@ const ReportsSection: React.FC = () => {
     // Implementation for export functionality
   };
 
-  if (loading) {
+  if (loading && !analytics) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f29520]"></div>
-        <span className="ml-3 text-lg text-gray-600">Loading analytics...</span>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl shadow-md border border-gray-100 p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 w-24 rounded mb-4"></div>
+              <div className="h-8 bg-gray-200 w-32 rounded"></div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 animate-pulse">
+          <div className="h-5 bg-gray-200 w-40 rounded mb-6"></div>
+          <div className="h-64 bg-gray-100 rounded"></div>
+        </div>
       </div>
     );
   }

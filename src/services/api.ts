@@ -287,13 +287,13 @@ export class BookingsService {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
+      // Select only necessary columns to reduce payload and improve performance
       const { data, error, count } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          tour_packages:package_id(name),
-          destinations:destination_id(name)
-        `, { count: 'exact' })
+        .select(
+          `id, customer_name, customer_email, customer_phone, gender, nationality, booking_date, end_date, participants, adults, children, total_amount, status, payment_status, dietary_requirements, selected_services, special_requests, created_at, updated_at`,
+          { count: 'estimated' }
+        )
         .range(from, to)
         .order('created_at', { ascending: false });
 

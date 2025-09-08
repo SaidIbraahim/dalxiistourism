@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Plus, Download, Upload, CreditCard, Receipt, FileText, Users, Calendar } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { supabase } from '../../lib/supabase';
+import { cacheService } from '../../services/CacheService';
 import PaymentProcessingTab from '../../components/admin/financial/PaymentProcessingTab';
 import ReceiptManagementTab from '../../components/admin/financial/ReceiptManagementTab';
 import { colors, typography, componentSizes, borderRadius, shadows, components } from '../../styles/designSystem';
@@ -60,12 +61,19 @@ const FinancialManagementSection: React.FC = () => {
 
   const fetchFinancialData = async () => {
     try {
-      setLoading(true);
-      
-      // Fetch bookings for income calculation
+      const cacheKey = 'financial_overview_bookings';
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        setFinancialData(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
+      // Fetch only minimal columns needed for metrics
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select('*')
+        .select('id, status, payment_status, total_amount, created_at')
         .order('created_at', { ascending: false });
 
       if (bookingsError) {
@@ -79,6 +87,7 @@ const FinancialManagementSection: React.FC = () => {
       const processedData = processFinancialData(bookings || []);
       console.log('Processed financial data:', processedData);
       setFinancialData(processedData);
+      cacheService.set(cacheKey, processedData, 2 * 60 * 1000);
       
     } catch (error: any) {
       console.error('Error fetching financial data:', error);
@@ -348,11 +357,21 @@ const FinancialManagementSection: React.FC = () => {
     </div>
   );
 
-  if (loading) {
+  if (loading && !financialData) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f29520]"></div>
-        <span className="ml-3 text-lg text-gray-600">Loading financial data...</span>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl shadow-md border border-gray-100 p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 w-24 rounded mb-4"></div>
+              <div className="h-8 bg-gray-200 w-32 rounded"></div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 animate-pulse">
+          <div className="h-5 bg-gray-200 w-40 rounded mb-6"></div>
+          <div className="h-64 bg-gray-100 rounded"></div>
+        </div>
       </div>
     );
   }

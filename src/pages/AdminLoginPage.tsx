@@ -15,9 +15,10 @@ const AdminLoginPage: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  // Preload background image for smooth loading
+  // Preload background image for smooth loading (high priority)
   useEffect(() => {
     const img = new Image();
+    (img as any).fetchPriority = 'high';
     img.onload = () => {
       setImageLoaded(true);
     };
